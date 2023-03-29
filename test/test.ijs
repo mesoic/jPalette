@@ -10,24 +10,44 @@ load'../chan.ijs'
 NB. define test data path
 path=:'./base/'
 
-NB. define validation
-is_valid=: verb : '|(sum y % ((0 { $ y) * (1 { $ y)))'
-
-NB. define image shape (m x n) pixels
+NB. define test geometry
 shape=: 200 300
 
-NB. write basecolor outputs
-(r_jpg shape) writejpeg jpath (path,'r.jpg')
-(g_jpg shape) writejpeg jpath (path,'g.jpg')
-(b_jpg shape) writejpeg jpath (path,'b.jpg')
-(w_jpg shape) writejpeg jpath (path,'w.jpg')
+NB. build and return channel datasets
+build_chan=: verb : 0
+select. y
+case. 'w.jpg' do. (w_jpg shape)
+case. 'r.jpg' do. (r_jpg shape)
+case. 'g.jpg' do. (g_jpg shape)
+case. 'b.jpg' do. (b_jpg shape)
+case. 'c.jpg' do. (c_jpg shape)
+case. 'y.jpg' do. (y_jpg shape)
+case. 'm.jpg' do. (m_jpg shape)
+case. 'k.jpg' do. (k_jpg shape)
+case. do. _1
+end.
+)
 
-(c_jpg shape) writejpeg jpath (path,'c.jpg')
-(y_jpg shape) writejpeg jpath (path,'y.jpg')
-(m_jpg shape) writejpeg jpath (path,'m.jpg')
-(k_jpg shape) writejpeg jpath (path,'k.jpg')
+NB. define validation function
+validate_chan=: verb : 0
+chan_w=: build_chan y
+chan_w writejpeg jpath (path,y)
+chan_r=: readjpeg jpath (path,y)
+res=: (map_rgb chan_r) - (chan_w)
+if. |(sum res % ((0 { $ res) * (1 { $ res))) < 2 do. echo y,' : PASS'
+elseif. do. echo y,' : FAIL'
+end.
+)
 
-NB. extract color channels
-r_dat=: readjpeg jpath (path,'r.jpg')
-r_res=: (map_rgb r_dat) - (r_jpg shape)
-echo is_valid r_res
+NB. validate channels
+validate_chan 'w.jpg'
+validate_chan 'r.jpg'
+validate_chan 'g.jpg'
+validate_chan 'b.jpg'
+validate_chan 'c.jpg'
+validate_chan 'y.jpg'
+validate_chan 'm.jpg'
+validate_chan 'k.jpg'
+
+NB. exit console
+exit''
